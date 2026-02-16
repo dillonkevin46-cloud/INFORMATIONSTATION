@@ -35,8 +35,13 @@
             display: flex;
             flex-direction: column;
             position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
             height: 100vh;
             overflow-y: auto;
+            z-index: 1000;
+            box-sizing: border-box; /* Ensure padding doesn't affect width calculation */
         }
 
         .brand {
@@ -67,7 +72,9 @@
         .main-content {
             flex-grow: 1;
             padding: 30px;
-            margin-left: var(--sidebar-width);
+            margin-left: var(--sidebar-width); /* Push content right by sidebar width */
+            width: calc(100% - var(--sidebar-width)); /* Ensure width is correct */
+            box-sizing: border-box;
             overflow-x: hidden;
         }
 
