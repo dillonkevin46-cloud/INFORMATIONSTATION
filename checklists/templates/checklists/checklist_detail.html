@@ -1,0 +1,39 @@
+{% extends "core/base.html" %}
+
+{% block page_title %}{{ template.title }}{% endblock %}
+
+{% block content %}
+<div class="widget-card" style="max-width: 600px; margin: 0 auto;">
+    <p style="color: #888; margin-bottom: 20px;">{{ template.description }}</p>
+
+    <form method="post">
+        {% csrf_token %}
+        {% for field in template.fields %}
+        <div class="form-group">
+            <label>{{ field.label }} {% if field.required %}<span style="color: var(--accent-red);">*</span>{% endif %}</label>
+
+            {% if field.type == 'text' %}
+            <input type="text" name="{{ field.label }}" {% if field.required %}required{% endif %}>
+
+            {% elif field.type == 'textarea' %}
+            <textarea name="{{ field.label }}" rows="4" {% if field.required %}required{% endif %}></textarea>
+
+            {% elif field.type == 'checkbox' %}
+            <input type="checkbox" name="{{ field.label }}" style="width: auto;">
+
+            {% elif field.type == 'select' %}
+            <select name="{{ field.label }}">
+                {% for option in field.options %}
+                <option value="{{ option }}">{{ option }}</option>
+                {% endfor %}
+            </select>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <div style="margin-top: 30px;">
+            <button type="submit" class="btn btn-primary">Submit Form</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

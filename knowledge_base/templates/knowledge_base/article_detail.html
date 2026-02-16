@@ -1,0 +1,36 @@
+{% extends "core/base.html" %}
+
+{% block page_title %}{{ article.title }}{% endblock %}
+
+{% block content %}
+<div class="widget-card" style="max-width: 800px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: #888;">
+        <span><span class="accent-dot dot-blue"></span> {{ article.category }}</span>
+        <span>{{ article.created_at|date:"F d, Y" }}</span>
+    </div>
+
+    <div style="line-height: 1.6; font-size: 1.1rem; color: #ddd; margin-bottom: 40px;">
+        {{ article.content|linebreaks }}
+    </div>
+
+    {% if article.attachments.exists %}
+    <h3 style="color: var(--accent-green); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">Attachments</h3>
+    <ul style="list-style: none; padding: 0;">
+        {% for att in article.attachments.all %}
+        <li style="margin-bottom: 10px;">
+            <a href="{{ att.file.url }}" target="_blank" style="color: var(--accent-blue); text-decoration: none;">
+                📎 {{ att.description|default:att.file.name }}
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if user.is_staff and article.private_notes %}
+    <div style="background: rgba(255, 215, 0, 0.1); border-left: 3px solid var(--accent-yellow); padding: 15px; margin-top: 30px;">
+        <h4 style="color: var(--accent-yellow); margin-top: 0;">Internal Notes</h4>
+        <p style="margin: 0; color: #ccc;">{{ article.private_notes }}</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

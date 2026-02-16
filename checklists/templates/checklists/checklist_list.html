@@ -1,0 +1,21 @@
+{% extends "core/base.html" %}
+
+{% block page_title %}Checklists & Forms{% endblock %}
+
+{% block content %}
+<div class="grid-container">
+    {% for template in templates %}
+    <div class="widget-card">
+        <h3 style="margin-top: 0; color: var(--accent-green);">{{ template.title }}</h3>
+        <p style="color: #888;">{{ template.description }}</p>
+        <div style="margin-top: 20px;">
+            <a href="{% url 'checklist_detail' template.pk %}" class="btn btn-primary">Start Form</a>
+        </div>
+    </div>
+    {% empty %}
+    <div style="grid-column: 1 / -1; text-align: center; color: #666; padding: 40px;">
+        No forms available.
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

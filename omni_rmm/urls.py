@@ -28,4 +28,10 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include(router.urls)),
     path("", dashboard_view, name="dashboard"),
+
+    # App URLs
+    path("devices/", include("devices.urls")),
+    path("tickets/", include("tickets.urls")),
+    path("kb/", include("knowledge_base.urls")),
+    path("checklists/", include("checklists.urls")),
 ]

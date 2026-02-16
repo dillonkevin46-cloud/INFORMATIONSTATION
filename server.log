@@ -1,0 +1,13 @@
+Running migrations...
+Operations to perform:
+  Apply all migrations: admin, auth, checklists, contenttypes, core, devices, knowledge_base, sessions, tickets
+Running migrations:
+  No migrations to apply.
+Collecting static files...
+
+0 static files copied to '/app/staticfiles', 166 unmodified.
+Starting Omni-RMM Server...
+2026-02-16 09:23:17,803 INFO     Starting server at tcp:port=8000:interface=127.0.0.1
+2026-02-16 09:23:17,804 INFO     HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+2026-02-16 09:23:17,805 INFO     Configuring endpoint tcp:port=8000:interface=127.0.0.1
+2026-02-16 09:23:17,806 INFO     Listening on TCP address 127.0.0.1:8000
