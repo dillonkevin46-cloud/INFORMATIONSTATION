@@ -16,7 +16,7 @@ Omni-RMM is a comprehensive Remote Monitoring and Management system.
 
 1. Install dependencies:
    ```bash
-   pip install django channels daphne djangorestframework psycopg2-binary websockets psutil
+   pip install -r requirements.txt
    ```
 
 2. Run migrations (Essential):
