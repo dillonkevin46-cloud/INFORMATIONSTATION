@@ -48,7 +48,7 @@ async def heartbeat_task(websocket):
                 disk = psutil.disk_usage('/').percent
             except:
                 disk = 0
-
+            
             payload = {
                 "type": "heartbeat",
                 "data": {
@@ -90,26 +90,26 @@ async def agent_main():
             print(f"Connecting to {SERVER_URL}...")
             async with websockets.connect(SERVER_URL) as websocket:
                 print("Connected!")
-
+                
                 # Handshake
                 info = get_system_info()
                 await websocket.send(json.dumps({
                     "type": "handshake",
                     "data": info
                 }))
-
+                
                 # Start tasks
                 producer = asyncio.create_task(heartbeat_task(websocket))
                 consumer = asyncio.create_task(receive_task(websocket))
-
+                
                 done, pending = await asyncio.wait(
                     [producer, consumer],
                     return_when=asyncio.FIRST_COMPLETED,
                 )
-
+                
                 for task in pending:
                     task.cancel()
-
+                    
         except ConnectionRefusedError:
             print("Connection refused. Server might be down. Retrying in 5 seconds...")
             await asyncio.sleep(5)
@@ -121,7 +121,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Omni-RMM Agent")
     parser.add_argument("--server", type=str, help="WebSocket URL of the server")
     args = parser.parse_args()
-
+    
     if args.server:
         SERVER_URL = args.server
     elif os.environ.get("RMM_SERVER_URL"):

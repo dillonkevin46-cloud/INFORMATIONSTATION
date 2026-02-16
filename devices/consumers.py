@@ -36,13 +36,13 @@ class AgentConsumer(AsyncJsonWebsocketConsumer):
         # data: {hostname, mac_address, os_info, local_ip, public_ip, agent_version}
         device = await self.get_or_create_device(data)
         self.device_id = str(device.id)
-
+        
         # Add to device specific group for targeted commands
         await self.channel_layer.group_add(
             f"device_{self.device_id}",
             self.channel_name
         )
-
+        
         await self.send_json({
             'type': 'handshake_ack',
             'status': 'success',
@@ -52,7 +52,7 @@ class AgentConsumer(AsyncJsonWebsocketConsumer):
     async def handle_heartbeat(self, data):
         if not self.device_id:
             return
-
+        
         # Update last seen and telemetry
         await self.save_telemetry(data)
         await self.update_last_seen()
@@ -63,7 +63,7 @@ class AgentConsumer(AsyncJsonWebsocketConsumer):
         if not mac:
             # Fallback or error handling
             return None
-
+            
         defaults = {
             'hostname': data.get('hostname'),
             'os_info': data.get('os_info'),
@@ -73,7 +73,7 @@ class AgentConsumer(AsyncJsonWebsocketConsumer):
             'last_seen': timezone.now(),
             'is_online': True
         }
-
+        
         device, created = Device.objects.update_or_create(
             mac_address=mac,
             defaults=defaults
@@ -99,7 +99,7 @@ class AgentConsumer(AsyncJsonWebsocketConsumer):
                 ram_usage=data.get('ram_usage', 0),
                 disk_usage=data.get('disk_usage', 0)
             )
-
+            
     async def device_command(self, event):
         """
         Handler for messages sent from the server (admin) to this consumer via channel layer.

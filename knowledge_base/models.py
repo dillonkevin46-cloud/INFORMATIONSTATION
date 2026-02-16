@@ -6,10 +6,10 @@ class Article(models.Model):
     category = models.CharField(max_length=100)
     content = models.TextField(help_text="Markdown or HTML content")
     author = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='articles', on_delete=models.SET_NULL, null=True)
-
+    
     is_public = models.BooleanField(default=False, help_text="Visible to clients?")
     private_notes = models.TextField(blank=True, help_text="Internal notes for admins")
-
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

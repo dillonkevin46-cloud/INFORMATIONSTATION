@@ -12,10 +12,10 @@ class FormTemplate(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     form_type = models.CharField(max_length=50, choices=FORM_TYPES, default='checklist')
-
+    
     # Structure: [{'label': 'Is PC working?', 'type': 'checkbox', 'required': True}, ...]
     fields = models.JSONField(default=list, help_text="List of field definitions")
-
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -26,10 +26,10 @@ class FormSubmission(models.Model):
     template = models.ForeignKey(FormTemplate, related_name='submissions', on_delete=models.CASCADE)
     submitted_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='submissions', on_delete=models.SET_NULL, null=True)
     ticket = models.ForeignKey(Ticket, related_name='forms', on_delete=models.SET_NULL, null=True, blank=True)
-
+    
     # Structure: {'field_1': True, 'field_2': 'Some text'}
     data = models.JSONField(default=dict)
-
+    
     completed = models.BooleanField(default=False)
     submitted_at = models.DateTimeField(auto_now_add=True)
 

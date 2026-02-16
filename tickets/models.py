@@ -16,17 +16,17 @@ class Ticket(models.Model):
         ('high', 'High'),
         ('critical', 'Critical'),
     )
-
+    
     title = models.CharField(max_length=200)
     description = models.TextField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='medium')
     category = models.CharField(max_length=100, blank=True)
-
+    
     client = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='tickets_created', on_delete=models.CASCADE)
     assigned_to = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='tickets_assigned', on_delete=models.SET_NULL, null=True, blank=True)
     device = models.ForeignKey(Device, related_name='tickets', on_delete=models.SET_NULL, null=True, blank=True)
-
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     closed_at = models.DateTimeField(blank=True, null=True)
@@ -48,5 +48,5 @@ class TimeEntry(models.Model):
     start_time = models.DateTimeField()
     end_time = models.DateTimeField(blank=True, null=True)
     duration_minutes = models.IntegerField(default=0)
-
+    
     created_at = models.DateTimeField(auto_now_add=True)

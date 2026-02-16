@@ -9,17 +9,17 @@ class Device(models.Model):
     public_ip = models.GenericIPAddressField(blank=True, null=True)
     local_ip = models.GenericIPAddressField(blank=True, null=True)
     mac_address = models.CharField(max_length=50, blank=True, null=True, unique=True)
-
+    
     agent_version = models.CharField(max_length=20, blank=True, null=True)
     is_online = models.BooleanField(default=False)
     last_seen = models.DateTimeField(blank=True, null=True)
-
+    
     # Relationships
     assigned_client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='devices')
-
+    
     # Monitoring flags
     is_important = models.BooleanField(default=False, help_text="Alert if offline")
-
+    
     # Specs (JSON for flexibility)
     specs = models.JSONField(default=dict, blank=True)
 
@@ -42,7 +42,7 @@ class TelemetryData(models.Model):
     cpu_usage = models.FloatField(help_text="Percentage")
     ram_usage = models.FloatField(help_text="Percentage")
     disk_usage = models.FloatField(help_text="Percentage")
-
+    
     class Meta:
         ordering = ['-timestamp']
 
@@ -61,12 +61,12 @@ class Asset(models.Model):
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
     ip_address = models.GenericIPAddressField(blank=True, null=True)
     is_monitored = models.BooleanField(default=False)
-
+    
     assigned_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='assets', on_delete=models.SET_NULL, null=True, blank=True)
     purchase_date = models.DateField(blank=True, null=True)
     warranty_expiry = models.DateField(blank=True, null=True)
     notes = models.TextField(blank=True)
-
+    
     specs = models.JSONField(default=dict, blank=True)
 
     def __str__(self):
@@ -80,7 +80,7 @@ class MonitoringAlert(models.Model):
     )
     device = models.ForeignKey(Device, related_name='alerts', on_delete=models.CASCADE, null=True, blank=True)
     asset = models.ForeignKey(Asset, related_name='alerts', on_delete=models.CASCADE, null=True, blank=True)
-
+    
     message = models.TextField()
     severity = models.CharField(max_length=20, choices=SEVERITY_CHOICES, default='info')
     created_at = models.DateTimeField(auto_now_add=True)

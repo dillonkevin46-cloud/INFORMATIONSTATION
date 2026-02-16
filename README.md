@@ -19,9 +19,8 @@ Omni-RMM is a comprehensive Remote Monitoring and Management system.
    pip install django channels daphne djangorestframework psycopg2-binary websockets psutil
    ```
 
-2. Run migrations:
+2. Run migrations (Essential):
    ```bash
-   python manage.py makemigrations
    python manage.py migrate
    ```
 
@@ -29,6 +28,10 @@ Omni-RMM is a comprehensive Remote Monitoring and Management system.
    ```bash
    daphne -p 8000 omni_rmm.asgi:application
    ```
+
+   **Alternatively, use the provided helper scripts:**
+   - Windows: `start_server.bat`
+   - Linux/Mac: `./start_server.sh`
 
 ## Setup (Agent)
 
