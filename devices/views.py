@@ -1,7 +1,8 @@
 from rest_framework import viewsets
-from .models import Device
+from .models import Device, Asset
 from .serializers import DeviceSerializer
-from django.shortcuts import render, get_object_or_404
+from .forms import AssetForm
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
@@ -53,3 +54,29 @@ def device_send_command(request, device_id):
         except Exception as e:
              return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
     return JsonResponse({'status': 'error', 'message': 'Invalid method'}, status=405)
+
+# Asset Views
+def asset_list(request):
+    assets = Asset.objects.all()
+    return render(request, 'devices/asset_list.html', {'assets': assets})
+
+def asset_create(request):
+    if request.method == 'POST':
+        form = AssetForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('asset_list')
+    else:
+        form = AssetForm()
+    return render(request, 'devices/asset_form.html', {'form': form, 'title': 'Create Asset'})
+
+def asset_update(request, pk):
+    asset = get_object_or_404(Asset, pk=pk)
+    if request.method == 'POST':
+        form = AssetForm(request.POST, instance=asset)
+        if form.is_valid():
+            form.save()
+            return redirect('asset_list')
+    else:
+        form = AssetForm(instance=asset)
+    return render(request, 'devices/asset_form.html', {'form': form, 'title': 'Update Asset'})
