@@ -13,6 +13,7 @@ import base64
 import io
 import time
 from datetime import datetime
+import logging
 
 # GUI Libraries (wrapped for headless support)
 try:
@@ -23,10 +24,10 @@ try:
     GUI_AVAILABLE = True
 except ImportError:
     GUI_AVAILABLE = False
-    print("GUI libraries not found. Running in headless mode.")
+    logging.warning("GUI libraries not found. Running in headless mode.")
 except Exception as e:
     GUI_AVAILABLE = False
-    print(f"GUI initialization failed: {e}. Running in headless mode.")
+    logging.error(f"GUI initialization failed: {e}. Running in headless mode.")
 
 try:
     import mss
@@ -86,10 +87,10 @@ async def heartbeat_task(websocket):
             await websocket.send(json.dumps(payload))
             await asyncio.sleep(5)
         except websockets.exceptions.ConnectionClosed:
-            print("Heartbeat: Connection closed")
+            logging.warning("Heartbeat: Connection closed")
             break
         except Exception as e:
-            print(f"Heartbeat error: {e}")
+            logging.error(f"Heartbeat error: {e}")
             break
 
 async def receive_task(websocket):
@@ -109,19 +110,19 @@ async def receive_task(websocket):
                 elif msg_type == 'get_screenshot':
                     await handle_screenshot(websocket)
                 elif msg_type == 'handshake_ack':
-                    print(f"Registered with ID: {data.get('device_id')}")
-            except json.JSONDecodeError:
-                pass
+                    logging.info(f"Registered with ID: {data.get('device_id')}")
+            except json.JSONDecodeError as e:
+                logging.error(f"JSON decode error: {e}")
             except Exception as e:
-                print(f"Error processing message: {e}")
+                logging.error(f"Error processing message: {e}")
     except websockets.exceptions.ConnectionClosed:
-        print("Receive: Connection closed")
+        logging.warning("Receive: Connection closed")
 
 async def handle_command(websocket, cmd):
     if not cmd:
         return
     
-    print(f"Executing command: {cmd}")
+    logging.info(f"Executing command: {cmd}")
     try:
         # Run command
         proc = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=30)
@@ -179,7 +180,7 @@ async def handle_screenshot(websocket):
             }
             await websocket.send(json.dumps(response))
     except Exception as e:
-        print(f"Screenshot error: {e}")
+        logging.error(f"Screenshot error: {e}")
         await websocket.send(json.dumps({
             "type": "screenshot_response",
             "error": str(e)
@@ -188,9 +189,9 @@ async def handle_screenshot(websocket):
 async def agent_loop():
     while True:
         try:
-            print(f"Connecting to {SERVER_URL}...")
+            logging.info(f"Connecting to {SERVER_URL}...")
             async with websockets.connect(SERVER_URL) as websocket:
-                print("Connected!")
+                logging.info("Connected!")
                 
                 # Handshake
                 info = get_system_info()
@@ -212,10 +213,10 @@ async def agent_loop():
                     task.cancel()
                     
         except ConnectionRefusedError:
-            print("Connection refused. Retrying in 5s...")
+            logging.warning("Connection refused. Retrying in 5s...")
             await asyncio.sleep(5)
         except Exception as e:
-            print(f"Connection failed: {e}. Retrying in 5s...")
+            logging.error(f"Connection failed: {e}. Retrying in 5s...")
             await asyncio.sleep(5)
 
 def run_async_loop():
@@ -224,7 +225,7 @@ def run_async_loop():
 # GUI Callbacks
 def on_report_issue(icon, item):
     if not GUI_AVAILABLE:
-        print("Report Issue triggered (Headless mode)")
+        logging.info("Report Issue triggered (Headless mode)")
         return
 
     try:
@@ -234,14 +235,14 @@ def on_report_issue(icon, item):
         if issue_text:
             # In a real app, send this to server via websocket
             # For now, just print or simulate
-            print(f"Issue Reported: {issue_text}")
+            logging.info(f"Issue Reported: {issue_text}")
             messagebox.showinfo("Success", "Issue reported successfully.")
         root.destroy()
     except Exception as e:
-        print(f"GUI Error: {e}")
+        logging.error(f"GUI Error: {e}")
 
 def on_network_test(icon, item):
-    print("Running Network Test...")
+    logging.info("Running Network Test...")
     try:
         # Simple ping test
         param = '-n' if platform.system().lower()=='windows' else '-c'
@@ -257,9 +258,9 @@ def on_network_test(icon, item):
             root.withdraw()
             messagebox.showinfo("Network Test", msg)
             root.destroy()
-        print(msg)
+        logging.info(msg)
     except Exception as e:
-        print(f"Network Test Error: {e}")
+        logging.error(f"Network Test Error: {e}")
 
 def create_tray_icon():
     if not GUI_AVAILABLE:
@@ -278,10 +279,12 @@ def create_tray_icon():
         icon = pystray.Icon("Omni-RMM", image, "Omni-RMM Agent", menu)
         return icon
     except Exception as e:
-        print(f"Failed to create tray icon: {e}")
+        logging.error(f"Failed to create tray icon: {e}")
         return None
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
     parser = argparse.ArgumentParser(description="Omni-RMM Agent")
     parser.add_argument("--server", type=str, help="WebSocket URL")
     args = parser.parse_args()
@@ -303,11 +306,11 @@ if __name__ == "__main__":
                 icon.run()
             else:
                 # If icon creation failed (e.g. no display), just join thread
-                print("Running in headless mode (Icon creation failed).")
+                logging.info("Running in headless mode (Icon creation failed).")
                 t.join()
         except Exception as e:
-            print(f"GUI Crash: {e}. Running headless.")
+            logging.error(f"GUI Crash: {e}. Running headless.")
             t.join()
     else:
-        print("Running in headless mode.")
+        logging.info("Running in headless mode.")
         t.join()
