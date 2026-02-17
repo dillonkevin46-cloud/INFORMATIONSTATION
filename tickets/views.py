@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from .models import Ticket
 from .forms import TicketForm, TicketMessageForm
 
+
 def ticket_list(request):
     status = request.GET.get('status')
     if status:
@@ -11,9 +12,10 @@ def ticket_list(request):
     tickets = tickets.order_by('-created_at')
     return render(request, 'tickets/ticket_list.html', {'tickets': tickets})
 
+
 def ticket_detail(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
-    
+
     if request.method == 'POST':
         form = TicketMessageForm(request.POST)
         if form.is_valid():
@@ -31,7 +33,9 @@ def ticket_detail(request, ticket_id):
     else:
         form = TicketMessageForm()
 
-    return render(request, 'tickets/ticket_detail.html', {'ticket': ticket, 'form': form})
+    return render(request, 'tickets/ticket_detail.html',
+                  {'ticket': ticket, 'form': form})
+
 
 def ticket_create(request):
     if request.method == 'POST':
@@ -45,10 +49,10 @@ def ticket_create(request):
                 from django.contrib.auth import get_user_model
                 User = get_user_model()
                 ticket.client = User.objects.first()
-            
+
             ticket.save()
             return redirect('ticket_detail', ticket_id=ticket.id)
     else:
         form = TicketForm()
-    
+
     return render(request, 'tickets/ticket_form.html', {'form': form})
