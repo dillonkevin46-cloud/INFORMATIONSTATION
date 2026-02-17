@@ -16,10 +16,14 @@
         <p><strong>Agent Version:</strong> {{ device.agent_version }}</p>
         <p><strong>Status:</strong> <span class="{% if device.is_online %}status-online{% else %}status-offline{% endif %}">{% if device.is_online %}ONLINE{% else %}OFFLINE{% endif %}</span></p>
         <p><strong>Last Seen:</strong> {{ device.last_seen|date:"Y-m-d H:i:s" }}</p>
+
+        <div style="margin-top: 20px;">
+            <a href="{% url 'remote_control' device.id %}" class="btn btn-primary">Remote Control / Live View</a>
+        </div>
     </div>
 
     <div class="card-panel" style="flex: 1; min-width: 300px;">
-        <h3>Execute Command</h3>
+        <h3>Execute Command (Quick)</h3>
         {% if device.is_online %}
         <p style="color: #888;">Send a shell command to the agent.</p>
         <div style="display: flex; gap: 10px;">

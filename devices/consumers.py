@@ -3,6 +3,10 @@ from channels.db import database_sync_to_async
 from django.utils import timezone
 from .models import Device, TelemetryData
 import json
+import logging
+import traceback
+
+logger = logging.getLogger(__name__)
 
 class AgentConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
@@ -18,51 +22,73 @@ class AgentConsumer(AsyncJsonWebsocketConsumer):
             )
 
     async def receive_json(self, content):
-        message_type = content.get('type')
-        data = content.get('data')
+        try:
+            message_type = content.get('type')
+            data = content.get('data')
 
-        if message_type == 'handshake':
-            await self.handle_handshake(data)
-        elif message_type == 'heartbeat':
-            await self.handle_heartbeat(data)
-        elif message_type == 'command_response':
-            # Handle command response from agent
-            pass
+            if message_type == 'handshake':
+                await self.handle_handshake(data)
+            elif message_type == 'heartbeat':
+                await self.handle_heartbeat(data)
+            elif message_type == 'command_response':
+                await self.broadcast_to_browser('command_response', data)
+            elif message_type == 'screenshot':
+                await self.broadcast_to_browser('screenshot', data)
+        except Exception as e:
+            print(f"Error processing message: {e}")
+            traceback.print_exc()
+
+    async def broadcast_to_browser(self, msg_type, data):
+        if self.device_id:
+            await self.channel_layer.group_send(
+                f"device_{self.device_id}_browser",
+                {
+                    "type": "browser.message",
+                    "message": {
+                        "type": msg_type,
+                        "data": data
+                    }
+                }
+            )
 
     async def handle_handshake(self, data):
-        """
-        Register or update the device based on MAC address.
-        """
-        # data: {hostname, mac_address, os_info, local_ip, public_ip, agent_version}
-        device = await self.get_or_create_device(data)
-        self.device_id = str(device.id)
-        
-        # Add to device specific group for targeted commands
-        await self.channel_layer.group_add(
-            f"device_{self.device_id}",
-            self.channel_name
-        )
-        
-        await self.send_json({
-            'type': 'handshake_ack',
-            'status': 'success',
-            'device_id': self.device_id
-        })
+        try:
+            device = await self.get_or_create_device(data)
+            self.device_id = str(device.id)
+
+            # Agent listens on this group for commands from server
+            await self.channel_layer.group_add(
+                f"device_{self.device_id}",
+                self.channel_name
+            )
+
+            await self.send_json({
+                'type': 'handshake_ack',
+                'status': 'success',
+                'device_id': self.device_id
+            })
+            print(f"Device connected: {self.device_id}")
+        except Exception as e:
+            print(f"Handshake error: {e}")
+            traceback.print_exc()
+            await self.close()
 
     async def handle_heartbeat(self, data):
         if not self.device_id:
             return
-        
-        # Update last seen and telemetry
-        await self.save_telemetry(data)
-        await self.update_last_seen()
+        try:
+            await self.save_telemetry(data)
+            await self.update_last_seen()
+            # Optional: Broadcast heartbeat to browser for live status?
+            await self.broadcast_to_browser('heartbeat', data)
+        except Exception as e:
+            print(f"Heartbeat error: {e}")
 
     @database_sync_to_async
     def get_or_create_device(self, data):
         mac = data.get('mac_address')
         if not mac:
-            # Fallback or error handling
-            return None
+            raise ValueError("MAC address required")
             
         defaults = {
             'hostname': data.get('hostname'),
@@ -102,7 +128,54 @@ class AgentConsumer(AsyncJsonWebsocketConsumer):
             
     async def device_command(self, event):
         """
-        Handler for messages sent from the server (admin) to this consumer via channel layer.
-        event: {'type': 'device_command', 'content': {'command': 'reboot', ...}}
+        Handler for commands sent from server to agent
         """
         await self.send_json(event['content'])
+
+
+class DeviceBrowserConsumer(AsyncJsonWebsocketConsumer):
+    async def connect(self):
+        self.device_id = self.scope['url_route']['kwargs']['device_id']
+        await self.channel_layer.group_add(
+            f"device_{self.device_id}_browser",
+            self.channel_name
+        )
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard(
+            f"device_{self.device_id}_browser",
+            self.channel_name
+        )
+
+    async def receive_json(self, content):
+        # Handle commands from browser to agent (e.g., "get_screenshot")
+        message_type = content.get('type')
+        if message_type == 'command':
+            # Forward command to Agent group
+            await self.channel_layer.group_send(
+                f"device_{self.device_id}",
+                {
+                    "type": "device.command",
+                    "content": {
+                        "type": "command",
+                        "command": content.get('command')
+                    }
+                }
+            )
+        elif message_type == 'get_screenshot':
+            await self.channel_layer.group_send(
+                f"device_{self.device_id}",
+                {
+                    "type": "device.command",
+                    "content": {
+                        "type": "get_screenshot"
+                    }
+                }
+            )
+
+    async def browser_message(self, event):
+        """
+        Receive message from AgentConsumer and send to Browser
+        """
+        await self.send_json(event['message'])

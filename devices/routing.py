@@ -3,4 +3,5 @@ from . import consumers
 
 websocket_urlpatterns = [
     re_path(r'ws/agent/$', consumers.AgentConsumer.as_asgi()),
+    re_path(r'ws/browser/(?P<device_id>[0-9a-f-]+)/$', consumers.DeviceBrowserConsumer.as_asgi()),
 ]

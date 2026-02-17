@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
 from devices.views import DeviceViewSet
-from core.views import dashboard_view
+from core.views import dashboard_view, dashboard_chart_data
 
 # API Router
 router = routers.DefaultRouter()
@@ -28,6 +28,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include(router.urls)),
     path("", dashboard_view, name="dashboard"),
+    path("api/chart-data/", dashboard_chart_data, name="dashboard_chart_data"),
     path("devices/", include("devices.urls")),
     path("tickets/", include("tickets.urls")),
     path("knowledge-base/", include("knowledge_base.urls")),
