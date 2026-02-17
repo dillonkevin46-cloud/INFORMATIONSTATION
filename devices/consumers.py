@@ -54,6 +54,11 @@ class AgentConsumer(AsyncJsonWebsocketConsumer):
     async def handle_handshake(self, data):
         try:
             device = await self.get_or_create_device(data)
+            if not device:
+                logger.error("Failed to authenticate device: get_or_create_device returned None")
+                await self.close()
+                return
+
             self.device_id = str(device.id)
             
             # Agent listens on this group for commands from server
