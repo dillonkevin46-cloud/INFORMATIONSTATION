@@ -8,7 +8,7 @@ from django.db.models.functions import TruncHour
 from devices.models import Device, TelemetryData
 from tickets.models import Ticket
 
-# @login_required # Commented out for now to allow viewing without login setup
+@login_required
 def dashboard_view(request):
     device_count = Device.objects.count()
     online_count = Device.objects.filter(is_online=True).count()
@@ -26,6 +26,7 @@ def dashboard_view(request):
     }
     return render(request, 'core/dashboard.html', context)
 
+@login_required
 def dashboard_chart_data(request):
     """
     Returns aggregated telemetry data for the last 24 hours.
