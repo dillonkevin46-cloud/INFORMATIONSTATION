@@ -211,11 +211,11 @@ async def agent_loop():
                 for task in pending:
                     task.cancel()
                     
-        except ConnectionRefusedError:
-            print("Connection refused. Retrying in 5s...")
-            await asyncio.sleep(5)
         except Exception as e:
-            print(f"Connection failed: {e}. Retrying in 5s...")
+            if isinstance(e, ConnectionRefusedError):
+                print("Connection refused. Retrying in 5s...")
+            else:
+                print(f"Connection failed: {e}. Retrying in 5s...")
             await asyncio.sleep(5)
 
 def run_async_loop():
