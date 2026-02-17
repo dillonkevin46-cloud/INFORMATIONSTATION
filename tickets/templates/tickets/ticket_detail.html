@@ -1,0 +1,36 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Ticket #{{ ticket.id }} - Omni-RMM{% endblock %}
+
+{% block header %}Ticket #{{ ticket.id }}: {{ ticket.title }}{% endblock %}
+
+{% block content %}
+<div class="card-panel">
+    <h3>Details</h3>
+    <p><strong>Status:</strong> {{ ticket.get_status_display }}</p>
+    <p><strong>Priority:</strong> {{ ticket.get_priority_display }}</p>
+    <p><strong>Category:</strong> {{ ticket.category }}</p>
+    <p><strong>Description:</strong></p>
+    <div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px;">
+        {{ ticket.description|linebreaks }}
+    </div>
+    <p><strong>Device:</strong> {{ ticket.device|default:"None" }}</p>
+    <p><strong>Created By:</strong> {{ ticket.client }}</p>
+    <p><strong>Assigned To:</strong> {{ ticket.assigned_to|default:"Unassigned" }}</p>
+</div>
+
+<div class="card-panel">
+    <h3>Messages</h3>
+    {% for message in ticket.messages.all %}
+    <div style="border-bottom: 1px solid rgba(255,255,255,0.05); padding: 10px 0;">
+        <p style="margin: 0; color: #aaa; font-size: 0.8rem;">
+            <strong>{{ message.author }}</strong> on {{ message.created_at|date:"Y-m-d H:i" }}
+            {% if message.is_internal %}(Internal){% endif %}
+        </p>
+        <p style="margin-top: 5px;">{{ message.content|linebreaks }}</p>
+    </div>
+    {% empty %}
+    <p style="color: #666;">No messages yet.</p>
+    {% endfor %}
+</div>
+{% endblock %}

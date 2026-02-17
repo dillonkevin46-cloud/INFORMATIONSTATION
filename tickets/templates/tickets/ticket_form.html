@@ -1,0 +1,25 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Create Ticket - Omni-RMM{% endblock %}
+
+{% block header %}Create New Ticket{% endblock %}
+
+{% block content %}
+<div class="card-panel" style="max-width: 600px;">
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+        <div style="margin-bottom: 15px;">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+            <div style="color: var(--accent-red); font-size: 0.8rem;">
+                {{ field.errors }}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary">Create Ticket</button>
+    </form>
+</div>
+{% endblock %}

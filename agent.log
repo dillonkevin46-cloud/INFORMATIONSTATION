@@ -1,0 +1,4 @@
+Connecting to ws://localhost:8000/ws/agent/...
+Connected!
+Received message: {"type": "handshake_ack", "status": "success", "device_id": "233c6b14-5547-495f-879b-09c9487ea850"}
+Registered with ID: 233c6b14-5547-495f-879b-09c9487ea850
