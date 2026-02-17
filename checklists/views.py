@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth import get_user_model
 from .models import FormTemplate, FormSubmission
 import json
 
@@ -42,7 +43,6 @@ def checklist_detail(request, checklist_id):
             submission.submitted_by = request.user
         else:
             # Fallback
-            from django.contrib.auth import get_user_model
             User = get_user_model()
             submission.submitted_by = User.objects.first()
 
