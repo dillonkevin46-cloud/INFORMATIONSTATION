@@ -1,0 +1,79 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Monitoring - Omni-RMM{% endblock %}
+
+{% block header %}Live Monitoring{% endblock %}
+
+{% block content %}
+<div class="card-panel">
+    <div style="margin-bottom: 20px; display: flex; justify-content: flex-end;">
+        <button onclick="window.location.reload();" class="btn btn-primary">Refresh Data</button>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Hostname</th>
+                <th>Status</th>
+                <th>Last Seen</th>
+                <th>CPU Usage</th>
+                <th>RAM Usage</th>
+                <th>Disk Usage</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for device in devices %}
+                {% with telemetry=device.telemetry.first %}
+                <tr>
+                    <td>{{ device.hostname }}</td>
+                    <td>
+                        <span class="status-badge {% if device.is_online %}status-online{% else %}status-offline{% endif %}"
+                              style="border: none; background: {% if device.is_online %}rgba(0, 255, 157, 0.1){% else %}rgba(255, 51, 102, 0.1){% endif %}; color: {% if device.is_online %}var(--accent-green){% else %}var(--accent-red){% endif %};">
+                            {% if device.is_online %}ONLINE{% else %}OFFLINE{% endif %}
+                        </span>
+                    </td>
+                    <td>{{ device.last_seen|date:"Y-m-d H:i:s" }}</td>
+                    <td>
+                        {% if telemetry %}
+                            <span style="color: {% if telemetry.cpu_usage > 80 %}var(--accent-red){% elif telemetry.cpu_usage > 50 %}var(--accent-yellow){% else %}#ccc{% endif %};">
+                                {{ telemetry.cpu_usage }}%
+                            </span>
+                        {% else %}
+                            <span style="color: #666;">-</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if telemetry %}
+                            <span style="color: {% if telemetry.ram_usage > 80 %}var(--accent-red){% elif telemetry.ram_usage > 50 %}var(--accent-yellow){% else %}#ccc{% endif %};">
+                                {{ telemetry.ram_usage }}%
+                            </span>
+                        {% else %}
+                            <span style="color: #666;">-</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if telemetry %}
+                            <span style="color: {% if telemetry.disk_usage > 80 %}var(--accent-red){% elif telemetry.disk_usage > 50 %}var(--accent-yellow){% else %}#ccc{% endif %};">
+                                {{ telemetry.disk_usage }}%
+                            </span>
+                        {% else %}
+                            <span style="color: #666;">-</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'device_detail' device.id %}" class="btn btn-primary" style="padding: 4px 8px; font-size: 0.8rem;">Details</a>
+                        {% if device.is_online %}
+                        <a href="{% url 'remote_control' device.id %}" class="btn btn-primary" style="padding: 4px 8px; font-size: 0.8rem; background: rgba(0, 212, 255, 0.1); color: var(--accent-blue);">Remote</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endwith %}
+            {% empty %}
+            <tr>
+                <td colspan="7" style="text-align: center; color: #666;">No devices monitored.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

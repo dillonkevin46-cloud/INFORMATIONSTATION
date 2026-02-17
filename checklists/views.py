@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
 from .models import FormTemplate, FormSubmission
 import json
 
@@ -12,8 +13,7 @@ def checklist_detail(request, checklist_id):
     if request.method == 'POST':
         # Extract data dynamically
         submission_data = {}
-        # Ensure 'fields' is parsed as a list of dicts if stored as text,
-        # though models.JSONField usually handles this.
+        # Ensure 'fields' is parsed as a list of dicts if stored as text
         fields = checklist.fields
         if isinstance(fields, str):
              try:
@@ -36,7 +36,7 @@ def checklist_detail(request, checklist_id):
         submission = FormSubmission(
             template=checklist,
             data=submission_data,
-            completed=True, # Assume completed on submit for now
+            completed=True, # Assume completed on submit
         )
         if request.user.is_authenticated:
             submission.submitted_by = request.user
@@ -48,6 +48,7 @@ def checklist_detail(request, checklist_id):
 
         submission.save()
 
+        messages.success(request, f"Checklist '{checklist.title}' submitted successfully.")
         return redirect('checklist_list')
 
     return render(request, 'checklists/checklist_detail.html', {'checklist': checklist})

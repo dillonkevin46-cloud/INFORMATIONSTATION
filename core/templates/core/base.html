@@ -16,6 +16,7 @@
         </div>
         <nav>
             <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">Dashboard</a>
+            <a href="{% url 'monitoring' %}" class="nav-link {% if 'monitoring' in request.path %}active{% endif %}">Monitoring</a>
             <a href="{% url 'device_list' %}" class="nav-link {% if request.resolver_match.url_name == 'device_list' %}active{% endif %}">Devices</a>
             <a href="{% url 'asset_list' %}" class="nav-link {% if 'assets' in request.path %}active{% endif %}">Assets</a>
             <a href="{% url 'ticket_list' %}" class="nav-link {% if 'tickets' in request.path %}active{% endif %}">Tickets</a>

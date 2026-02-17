@@ -23,13 +23,24 @@ def device_detail(request, device_id):
     device = get_object_or_404(Device, id=device_id)
     return render(request, 'devices/device_detail.html', {'device': device})
 
+def monitoring_view(request):
+    """
+    Dedicated monitoring view showing device status and latest telemetry.
+    """
+    devices = Device.objects.all().order_by('-is_online', '-last_seen')
+
+    # Annotate with latest telemetry manually or via prefetch if needed.
+    # For now, we can access device.telemetry.first() in the template efficiently enough for small scale.
+    # To optimize, we could prefetch:
+    # devices = Device.objects.prefetch_related('telemetry').order_by(...)
+
+    return render(request, 'devices/monitoring.html', {'devices': devices})
+
 def remote_control(request, device_id):
     device = get_object_or_404(Device, id=device_id)
     return render(request, 'devices/remote_control.html', {'device': device})
 
 def device_send_command(request, device_id):
-    # This view might still be useful for one-off commands,
-    # but Remote Control page uses WebSockets directly.
     if request.method == 'POST':
         try:
             device = get_object_or_404(Device, id=device_id)

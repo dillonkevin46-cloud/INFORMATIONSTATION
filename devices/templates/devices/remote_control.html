@@ -49,13 +49,29 @@
         socket.onmessage = function(e) {
             const data = JSON.parse(e.data);
             const msgType = data.type;
-            const content = data.data;
+            const content = data.data || {};
 
             if (msgType === 'screenshot') {
                 const img = document.getElementById('screen-img');
-                img.src = "data:image/jpeg;base64," + content.image;
-                img.style.display = 'block';
-                document.getElementById('screen-status').style.display = 'none';
+                if (content.image) {
+                    img.src = "data:image/jpeg;base64," + content.image;
+                    img.style.display = 'block';
+                    document.getElementById('screen-status').style.display = 'none';
+                }
+            } else if (msgType === 'screenshot_response') {
+                // Handle errors explicitly
+                if (data.error) {
+                    const statusDiv = document.getElementById('screen-status');
+                    statusDiv.innerText = "Error: " + data.error;
+                    statusDiv.style.display = 'block';
+                    statusDiv.style.color = 'var(--accent-red)';
+
+                    document.getElementById('screen-img').style.display = 'none';
+                    // Stop auto-refresh if there's a permanent error like missing lib
+                    if (document.getElementById('auto-refresh').checked) {
+                        document.getElementById('auto-refresh').click();
+                    }
+                }
             } else if (msgType === 'command_response') {
                 const term = document.getElementById('terminal-output');
                 term.innerHTML += `\n> ${content.command}\n${content.output}\n`;
@@ -65,8 +81,10 @@
 
         socket.onclose = function() {
             console.log("Disconnected");
-            document.getElementById('screen-status').innerText = "Disconnected. Reconnecting...";
-            document.getElementById('screen-status').style.display = 'block';
+            const statusDiv = document.getElementById('screen-status');
+            statusDiv.innerText = "Disconnected. Reconnecting...";
+            statusDiv.style.display = 'block';
+            statusDiv.style.color = '#666';
             setTimeout(connect, 3000);
         };
     }
