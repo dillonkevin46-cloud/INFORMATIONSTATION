@@ -6,5 +6,6 @@ class DeviceViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows devices to be viewed or edited.
     """
-    queryset = Device.objects.all().order_by('-created_at')
+    # Optimized to fix N+1 query issue for telemetry data
+    queryset = Device.objects.all().prefetch_related('telemetry').order_by('-created_at')
     serializer_class = DeviceSerializer
