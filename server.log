@@ -7,7 +7,7 @@ Collecting static files...
 
 0 static files copied to '/app/staticfiles', 166 unmodified.
 Starting Omni-RMM Server...
-2026-02-16 12:05:35,958 INFO     Starting server at tcp:port=8000:interface=127.0.0.1
-2026-02-16 12:05:35,958 INFO     HTTP/2 support not enabled (install the http2 and tls Twisted extras)
-2026-02-16 12:05:35,959 INFO     Configuring endpoint tcp:port=8000:interface=127.0.0.1
-2026-02-16 12:05:35,961 CRITICAL Listen failure: Couldn't listen on 127.0.0.1:8000: [Errno 98] Address already in use.
+2026-02-17 04:52:59,094 INFO     Starting server at tcp:port=8000:interface=127.0.0.1
+2026-02-17 04:52:59,094 INFO     HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+2026-02-17 04:52:59,094 INFO     Configuring endpoint tcp:port=8000:interface=127.0.0.1
+2026-02-17 04:52:59,095 INFO     Listening on TCP address 127.0.0.1:8000

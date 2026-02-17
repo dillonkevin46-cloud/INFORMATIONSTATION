@@ -25,6 +25,8 @@ class AgentConsumer(AsyncJsonWebsocketConsumer):
             await self.handle_handshake(data)
         elif message_type == 'heartbeat':
             await self.handle_heartbeat(data)
+        elif message_type == 'create_ticket':
+            await self.handle_create_ticket(data)
         elif message_type == 'command_response':
             # Handle command response from agent
             pass
@@ -56,6 +58,22 @@ class AgentConsumer(AsyncJsonWebsocketConsumer):
         # Update last seen and telemetry
         await self.save_telemetry(data)
         await self.update_last_seen()
+
+    async def handle_create_ticket(self, data):
+        """
+        Creates a ticket from the agent.
+        """
+        from tickets.models import Ticket
+        from core.models import User
+
+        # Determine user (e.g., assigned client or generic)
+        if self.device_id:
+            device = await self.get_device(self.device_id)
+            client = await self.get_device_client(device)
+            if not client:
+                client = await self.get_default_user()
+
+            await self.create_ticket_db(data.get('title'), data.get('description'), client, device)
 
     @database_sync_to_async
     def get_or_create_device(self, data):
@@ -103,6 +121,30 @@ class AgentConsumer(AsyncJsonWebsocketConsumer):
     async def device_command(self, event):
         """
         Handler for messages sent from the server (admin) to this consumer via channel layer.
-        event: {'type': 'device_command', 'content': {'command': 'reboot', ...}}
+        event: {'type': 'device_command', 'content': {'type': 'command_exec', 'command': 'reboot'}}
         """
         await self.send_json(event['content'])
+
+    @database_sync_to_async
+    def get_device(self, device_id):
+        return Device.objects.get(id=device_id)
+
+    @database_sync_to_async
+    def get_device_client(self, device):
+        return device.assigned_client
+
+    @database_sync_to_async
+    def get_default_user(self):
+        return User.objects.filter(is_superuser=True).first()
+
+    @database_sync_to_async
+    def create_ticket_db(self, title, description, client, device):
+        from tickets.models import Ticket
+        Ticket.objects.create(
+            title=title,
+            description=description,
+            client=client,
+            device=device,
+            status='new',
+            priority='medium'
+        )

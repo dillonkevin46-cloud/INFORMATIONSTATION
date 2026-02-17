@@ -24,24 +24,23 @@
             padding: 0;
             display: flex;
             min-height: 100vh;
+            flex-direction: row; /* Horizontal layout */
+            overflow-x: hidden;
         }
 
         /* Sidebar Navigation */
         .sidebar {
-            width: var(--sidebar-width);
+            flex: 0 0 var(--sidebar-width); /* Fixed width, no grow/shrink */
             background: rgba(15, 15, 25, 0.95);
             border-right: 1px solid rgba(255, 255, 255, 0.05);
             padding: 20px;
             display: flex;
             flex-direction: column;
-            position: fixed;
-            top: 0;
-            left: 0;
-            bottom: 0;
             height: 100vh;
-            overflow-y: auto;
+            position: sticky; /* Sticky position keeps it in view while scrolling main content */
+            top: 0;
             z-index: 1000;
-            box-sizing: border-box; /* Ensure padding doesn't affect width calculation */
+            box-sizing: border-box;
         }
 
         .brand {
@@ -70,12 +69,12 @@
         }
 
         .main-content {
-            flex-grow: 1;
+            flex: 1; /* Take remaining space */
             padding: 30px;
-            margin-left: var(--sidebar-width); /* Push content right by sidebar width */
-            width: calc(100% - var(--sidebar-width)); /* Ensure width is correct */
+            /* margin-left removed because flex handles it */
             box-sizing: border-box;
             overflow-x: hidden;
+            width: 0; /* Fix for flex child overflow issues */
         }
 
         .header {
