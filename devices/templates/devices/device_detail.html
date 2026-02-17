@@ -1,0 +1,94 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ device.hostname }} - Omni-RMM{% endblock %}
+
+{% block header %}Device: {{ device.hostname }}{% endblock %}
+
+{% block content %}
+<div style="display: flex; gap: 20px; flex-wrap: wrap;">
+    <div class="card-panel" style="flex: 1; min-width: 300px;">
+        <h3>System Info</h3>
+        <p><strong>OS:</strong> {{ device.os_info }}</p>
+        <p><strong>Hostname:</strong> {{ device.hostname }}</p>
+        <p><strong>Local IP:</strong> {{ device.local_ip }}</p>
+        <p><strong>Public IP:</strong> {{ device.public_ip }}</p>
+        <p><strong>MAC Address:</strong> {{ device.mac_address }}</p>
+        <p><strong>Agent Version:</strong> {{ device.agent_version }}</p>
+        <p><strong>Status:</strong> <span class="{% if device.is_online %}status-online{% else %}status-offline{% endif %}">{% if device.is_online %}ONLINE{% else %}OFFLINE{% endif %}</span></p>
+        <p><strong>Last Seen:</strong> {{ device.last_seen|date:"Y-m-d H:i:s" }}</p>
+    </div>
+
+    <div class="card-panel" style="flex: 1; min-width: 300px;">
+        <h3>Execute Command</h3>
+        {% if device.is_online %}
+        <p style="color: #888;">Send a shell command to the agent.</p>
+        <div style="display: flex; gap: 10px;">
+            <input type="text" id="cmd-input" placeholder="e.g. echo 'Hello'" style="flex: 1; margin-bottom: 0;">
+            <button onclick="sendCommand()" class="btn btn-primary">Send</button>
+        </div>
+        <div id="cmd-result" style="margin-top: 10px; font-family: monospace; white-space: pre-wrap; color: #aaa;"></div>
+        {% else %}
+        <p style="color: var(--accent-red);">Device is OFFLINE. Commands cannot be sent.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card-panel">
+    <h3>Telemetry History</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>CPU</th>
+                <th>RAM</th>
+                <th>Disk</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for metric in device.telemetry.all|slice:":10" %}
+            <tr>
+                <td>{{ metric.timestamp|date:"H:i:s" }}</td>
+                <td>{{ metric.cpu_usage }}%</td>
+                <td>{{ metric.ram_usage }}%</td>
+                <td>{{ metric.disk_usage }}%</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4">No telemetry data available.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+function sendCommand() {
+    const cmd = document.getElementById('cmd-input').value;
+    if (!cmd) return;
+
+    const resultDiv = document.getElementById('cmd-result');
+    resultDiv.innerText = "Sending...";
+
+    fetch("{% url 'device_send_command' device.id %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({command: cmd})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            resultDiv.innerText = "Success: " + data.message;
+            document.getElementById('cmd-input').value = '';
+        } else {
+            resultDiv.innerText = "Error: " + data.message;
+            resultDiv.style.color = "var(--accent-red)";
+        }
+    })
+    .catch(error => {
+        resultDiv.innerText = "Network Error: " + error;
+        resultDiv.style.color = "var(--accent-red)";
+    });
+}
+</script>
+{% endblock %}

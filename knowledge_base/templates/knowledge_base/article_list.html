@@ -1,0 +1,38 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Knowledge Base - Omni-RMM{% endblock %}
+
+{% block header %}Knowledge Base{% endblock %}
+
+{% block content %}
+<div class="card-panel">
+    <table>
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Author</th>
+                <th>Updated</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for article in articles %}
+            <tr>
+                <td>{{ article.title }}</td>
+                <td>{{ article.category }}</td>
+                <td>{{ article.author }}</td>
+                <td>{{ article.updated_at|date:"Y-m-d" }}</td>
+                <td>
+                    <a href="{% url 'article_detail' article.id %}" class="btn btn-primary" style="padding: 4px 8px; font-size: 0.8rem;">Read</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align: center; color: #666;">No articles found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

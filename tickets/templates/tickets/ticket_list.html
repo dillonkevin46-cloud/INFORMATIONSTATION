@@ -1,0 +1,47 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Tickets - Omni-RMM{% endblock %}
+
+{% block header %}Tickets{% endblock %}
+
+{% block content %}
+<div class="card-panel">
+    <div style="margin-bottom: 20px;">
+        <a href="{% url 'ticket_create' %}" class="btn btn-primary">Create Ticket</a>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Priority</th>
+                <th>Category</th>
+                <th>Assigned To</th>
+                <th>Created At</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ticket in tickets %}
+            <tr>
+                <td>#{{ ticket.id }}</td>
+                <td>{{ ticket.title }}</td>
+                <td>{{ ticket.get_status_display }}</td>
+                <td>{{ ticket.get_priority_display }}</td>
+                <td>{{ ticket.category }}</td>
+                <td>{{ ticket.assigned_to|default:"-" }}</td>
+                <td>{{ ticket.created_at|date:"Y-m-d H:i" }}</td>
+                <td>
+                    <a href="{% url 'ticket_detail' ticket.id %}" class="btn btn-primary" style="padding: 4px 8px; font-size: 0.8rem;">View</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" style="text-align: center; color: #666;">No tickets found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

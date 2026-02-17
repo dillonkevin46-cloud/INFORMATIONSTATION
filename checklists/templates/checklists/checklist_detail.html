@@ -1,0 +1,47 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ checklist.title }} - Omni-RMM{% endblock %}
+
+{% block header %}{{ checklist.title }}{% endblock %}
+
+{% block content %}
+<div class="card-panel">
+    <div style="margin-bottom: 20px;">
+        <span style="background: rgba(0, 212, 255, 0.1); color: var(--accent-blue); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">
+            {{ checklist.get_form_type_display }}
+        </span>
+    </div>
+    <div style="margin-bottom: 30px; color: #ccc;">
+        {{ checklist.description|linebreaks }}
+    </div>
+
+    <h3>Fields</h3>
+    <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 4px;">
+        <form>
+            {% for field in checklist.fields %}
+            <div style="margin-bottom: 15px;">
+                <label>{{ field.label }} {% if field.required %}<span style="color: var(--accent-red);">*</span>{% endif %}</label>
+
+                {% if field.type == 'text' %}
+                    <input type="text" placeholder="Text input">
+                {% elif field.type == 'textarea' %}
+                    <textarea rows="3" placeholder="Text area"></textarea>
+                {% elif field.type == 'checkbox' %}
+                    <input type="checkbox" style="width: auto;">
+                {% elif field.type == 'select' %}
+                    <select>
+                        <option>Option 1</option>
+                        <option>Option 2</option>
+                    </select>
+                {% else %}
+                    <input type="text">
+                {% endif %}
+            </div>
+            {% empty %}
+            <p style="color: #666;">No fields defined.</p>
+            {% endfor %}
+            <button type="button" class="btn btn-primary" disabled>Submit (Preview)</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
