@@ -35,7 +35,7 @@ except ImportError:
     SCREENSHOT_AVAILABLE = False
 
 # Configuration
-DEFAULT_SERVER_URL = "ws://localhost:8000/ws/agent/"
+DEFAULT_SERVER_URL = "wss://localhost:8000/ws/agent/"
 SERVER_URL = DEFAULT_SERVER_URL
 AGENT_VERSION = "1.1.0"
 
