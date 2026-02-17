@@ -53,7 +53,7 @@ def get_system_info():
         s.connect(("8.8.8.8", 80))
         local_ip = s.getsockname()[0]
         s.close()
-    except:
+    except Exception:
         local_ip = "127.0.0.1"
 
     return {
@@ -72,7 +72,7 @@ async def heartbeat_task(websocket):
             ram = psutil.virtual_memory().percent
             try:
                 disk = psutil.disk_usage('/').percent
-            except:
+            except Exception:
                 disk = 0
             
             payload = {
