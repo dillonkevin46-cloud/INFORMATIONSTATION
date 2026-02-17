@@ -68,11 +68,18 @@ def get_system_info():
 async def heartbeat_task(websocket):
     while True:
         try:
-            cpu = psutil.cpu_percent()
-            ram = psutil.virtual_memory().percent
+            try:
+                cpu = psutil.cpu_percent()
+                ram = psutil.virtual_memory().percent
+            except Exception as e:
+                print(f"Error collecting CPU/RAM metrics: {e}")
+                cpu = 0
+                ram = 0
+
             try:
                 disk = psutil.disk_usage('/').percent
-            except:
+            except Exception as e:
+                print(f"Error collecting disk metrics: {e}")
                 disk = 0
             
             payload = {
@@ -89,7 +96,7 @@ async def heartbeat_task(websocket):
             print("Heartbeat: Connection closed")
             break
         except Exception as e:
-            print(f"Heartbeat error: {e}")
+            print(f"Heartbeat unexpected error: {e}")
             break
 
 async def receive_task(websocket):
