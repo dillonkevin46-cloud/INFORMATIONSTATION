@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from devices.models import Device
 from tickets.models import Ticket
 
-# @login_required # Commented out for now to allow viewing without login setup
+@login_required
 def dashboard_view(request):
     device_count = Device.objects.count()
     online_count = Device.objects.filter(is_online=True).count()
