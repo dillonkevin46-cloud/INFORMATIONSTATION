@@ -1,0 +1,49 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Assets - Omni-RMM{% endblock %}
+
+{% block header %}Asset Registry{% endblock %}
+
+{% block content %}
+<div class="card-panel">
+    <div style="margin-bottom: 20px;">
+        <a href="{% url 'asset_create' %}" class="btn btn-primary">Add New Asset</a>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Category</th>
+                <th>IP Address</th>
+                <th>Assigned User</th>
+                <th>Monitored</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for asset in assets %}
+            <tr>
+                <td>{{ asset.name }}</td>
+                <td>{{ asset.get_category_display }}</td>
+                <td>{{ asset.ip_address }}</td>
+                <td>{{ asset.assigned_user|default:"-" }}</td>
+                <td>
+                    {% if asset.is_monitored %}
+                    <span style="color: var(--accent-green);">Yes</span>
+                    {% else %}
+                    <span style="color: #666;">No</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'asset_update' asset.id %}" class="btn btn-primary" style="padding: 4px 8px; font-size: 0.8rem;">Edit</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align: center; color: #666;">No assets found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

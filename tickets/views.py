@@ -1,11 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Ticket
-from django import forms
-
-class TicketForm(forms.ModelForm):
-    class Meta:
-        model = Ticket
-        fields = ['title', 'description', 'priority', 'category', 'device']
+from .forms import TicketForm, TicketMessageForm
 
 def ticket_list(request):
     status = request.GET.get('status')
@@ -18,7 +13,25 @@ def ticket_list(request):
 
 def ticket_detail(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
-    return render(request, 'tickets/ticket_detail.html', {'ticket': ticket})
+    
+    if request.method == 'POST':
+        form = TicketMessageForm(request.POST)
+        if form.is_valid():
+            message = form.save(commit=False)
+            message.ticket = ticket
+            if request.user.is_authenticated:
+                message.author = request.user
+            else:
+                # Fallback for demo/no-auth
+                from django.contrib.auth import get_user_model
+                User = get_user_model()
+                message.author = User.objects.first()
+            message.save()
+            return redirect('ticket_detail', ticket_id=ticket.id)
+    else:
+        form = TicketMessageForm()
+
+    return render(request, 'tickets/ticket_detail.html', {'ticket': ticket, 'form': form})
 
 def ticket_create(request):
     if request.method == 'POST':
@@ -32,10 +45,10 @@ def ticket_create(request):
                 from django.contrib.auth import get_user_model
                 User = get_user_model()
                 ticket.client = User.objects.first()
-
+            
             ticket.save()
             return redirect('ticket_detail', ticket_id=ticket.id)
     else:
         form = TicketForm()
-
+    
     return render(request, 'tickets/ticket_form.html', {'form': form})

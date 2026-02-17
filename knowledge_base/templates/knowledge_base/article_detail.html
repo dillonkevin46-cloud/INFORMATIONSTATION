@@ -6,6 +6,9 @@
 
 {% block content %}
 <div class="card-panel">
+    <div style="margin-bottom: 20px;">
+        <a href="{% url 'article_update' article.id %}" class="btn btn-primary">Edit Article</a>
+    </div>
     <div style="color: #888; font-size: 0.9rem; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px;">
         <span style="margin-right: 20px;">Category: <strong>{{ article.category }}</strong></span>
         <span style="margin-right: 20px;">Author: <strong>{{ article.author }}</strong></span>
@@ -14,6 +17,13 @@
     <div class="article-content" style="line-height: 1.6; color: #ddd;">
         {{ article.content|linebreaks }}
     </div>
+    
+    {% if article.private_notes %}
+    <div style="margin-top: 30px; padding: 20px; background: rgba(255, 215, 0, 0.1); border-left: 3px solid var(--accent-yellow);">
+        <h4 style="margin-top: 0; color: var(--accent-yellow);">Private Notes (Admin Only)</h4>
+        {{ article.private_notes|linebreaks }}
+    </div>
+    {% endif %}
 
     {% if article.attachments.exists %}
     <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05);">

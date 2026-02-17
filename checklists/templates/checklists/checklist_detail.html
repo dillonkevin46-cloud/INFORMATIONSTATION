@@ -5,7 +5,7 @@
 {% block header %}{{ checklist.title }}{% endblock %}
 
 {% block content %}
-<div class="card-panel">
+<div class="card-panel" style="max-width: 800px;">
     <div style="margin-bottom: 20px;">
         <span style="background: rgba(0, 212, 255, 0.1); color: var(--accent-blue); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">
             {{ checklist.get_form_type_display }}
@@ -15,32 +15,50 @@
         {{ checklist.description|linebreaks }}
     </div>
 
-    <h3>Fields</h3>
+    <h3>Complete Form</h3>
     <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 4px;">
-        <form>
+        <form method="post">
+            {% csrf_token %}
             {% for field in checklist.fields %}
-            <div style="margin-bottom: 15px;">
-                <label>{{ field.label }} {% if field.required %}<span style="color: var(--accent-red);">*</span>{% endif %}</label>
-
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #e0e0e0;">
+                    {{ field.label }} {% if field.required %}<span style="color: var(--accent-red);">*</span>{% endif %}
+                </label>
+                
                 {% if field.type == 'text' %}
-                    <input type="text" placeholder="Text input">
+                    <input type="text" name="{{ field.label }}" {% if field.required %}required{% endif %} placeholder="Enter text..." value="">
+                
                 {% elif field.type == 'textarea' %}
-                    <textarea rows="3" placeholder="Text area"></textarea>
+                    <textarea name="{{ field.label }}" rows="3" {% if field.required %}required{% endif %} placeholder="Enter details..."></textarea>
+                
                 {% elif field.type == 'checkbox' %}
-                    <input type="checkbox" style="width: auto;">
+                    <div style="display: flex; align-items: center;">
+                        <input type="checkbox" name="{{ field.label }}" style="width: auto; margin-right: 10px;">
+                        <span style="color: #aaa;">Yes/Checked</span>
+                    </div>
+
                 {% elif field.type == 'select' %}
-                    <select>
-                        <option>Option 1</option>
-                        <option>Option 2</option>
+                    <select name="{{ field.label }}">
+                        {% for option in field.options %}
+                        <option value="{{ option }}">{{ option }}</option>
+                        {% endfor %}
                     </select>
+
                 {% else %}
-                    <input type="text">
+                    <!-- Fallback -->
+                    <input type="text" name="{{ field.label }}" {% if field.required %}required{% endif %}>
                 {% endif %}
             </div>
             {% empty %}
-            <p style="color: #666;">No fields defined.</p>
+            <p style="color: #666;">No fields defined in this template.</p>
             {% endfor %}
-            <button type="button" class="btn btn-primary" disabled>Submit (Preview)</button>
+            
+            {% if checklist.fields %}
+            <div style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+                <button type="submit" class="btn btn-primary">Submit Form</button>
+                <a href="{% url 'checklist_list' %}" class="btn btn-danger" style="margin-left: 10px;">Cancel</a>
+            </div>
+            {% endif %}
         </form>
     </div>
 </div>

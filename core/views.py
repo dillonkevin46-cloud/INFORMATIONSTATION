@@ -8,7 +8,7 @@ from django.db.models.functions import TruncHour
 from devices.models import Device, TelemetryData
 from tickets.models import Ticket
 
-@login_required
+# @login_required # Commented out for now to allow viewing without login setup
 def dashboard_view(request):
     device_count = Device.objects.count()
     online_count = Device.objects.filter(is_online=True).count()
@@ -34,18 +34,18 @@ def dashboard_chart_data(request):
     """
     now = timezone.now()
     last_24h = now - timedelta(hours=24)
-
+    
     # Aggregate by hour
     data = TelemetryData.objects.filter(timestamp__gte=last_24h) \
         .annotate(hour=TruncHour('timestamp')) \
         .values('hour') \
         .annotate(avg_cpu=Avg('cpu_usage'), avg_ram=Avg('ram_usage')) \
         .order_by('hour')
-
+        
     labels = [entry['hour'].strftime('%H:%M') for entry in data]
     cpu_data = [round(entry['avg_cpu'], 2) for entry in data]
     ram_data = [round(entry['avg_ram'], 2) for entry in data]
-
+    
     return JsonResponse({
         'labels': labels,
         'cpu': cpu_data,

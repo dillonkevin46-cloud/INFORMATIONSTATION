@@ -5,32 +5,88 @@
 {% block header %}Ticket #{{ ticket.id }}: {{ ticket.title }}{% endblock %}
 
 {% block content %}
-<div class="card-panel">
-    <h3>Details</h3>
-    <p><strong>Status:</strong> {{ ticket.get_status_display }}</p>
-    <p><strong>Priority:</strong> {{ ticket.get_priority_display }}</p>
-    <p><strong>Category:</strong> {{ ticket.category }}</p>
-    <p><strong>Description:</strong></p>
-    <div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px;">
-        {{ ticket.description|linebreaks }}
-    </div>
-    <p><strong>Device:</strong> {{ ticket.device|default:"None" }}</p>
-    <p><strong>Created By:</strong> {{ ticket.client }}</p>
-    <p><strong>Assigned To:</strong> {{ ticket.assigned_to|default:"Unassigned" }}</p>
-</div>
+<div style="display: flex; gap: 20px; flex-wrap: wrap;">
+    <div style="flex: 2; min-width: 400px;">
+        <div class="card-panel">
+            <h3>Discussion</h3>
+            <div style="max-height: 500px; overflow-y: auto; margin-bottom: 20px;">
+                <!-- Original Description as the first message -->
+                <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px; color: #888; font-size: 0.8rem;">
+                        <strong>{{ ticket.client }}</strong>
+                        <span>{{ ticket.created_at|date:"Y-m-d H:i" }}</span>
+                    </div>
+                    <div style="color: #ddd;">{{ ticket.description|linebreaks }}</div>
+                </div>
 
-<div class="card-panel">
-    <h3>Messages</h3>
-    {% for message in ticket.messages.all %}
-    <div style="border-bottom: 1px solid rgba(255,255,255,0.05); padding: 10px 0;">
-        <p style="margin: 0; color: #aaa; font-size: 0.8rem;">
-            <strong>{{ message.author }}</strong> on {{ message.created_at|date:"Y-m-d H:i" }}
-            {% if message.is_internal %}(Internal){% endif %}
-        </p>
-        <p style="margin-top: 5px;">{{ message.content|linebreaks }}</p>
+                {% for message in ticket.messages.all %}
+                <div style="background: {% if message.is_internal %}rgba(255, 215, 0, 0.05){% else %}rgba(255,255,255,0.02){% endif %}; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 3px solid {% if message.is_internal %}var(--accent-yellow){% else %}var(--accent-blue){% endif %};">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px; color: #888; font-size: 0.8rem;">
+                        <strong>{{ message.author }}</strong>
+                        <span>
+                            {{ message.created_at|date:"Y-m-d H:i" }}
+                            {% if message.is_internal %}<span style="color: var(--accent-yellow); margin-left: 5px;">(Internal Note)</span>{% endif %}
+                        </span>
+                    </div>
+                    <div style="color: #ddd;">{{ message.content|linebreaks }}</div>
+                </div>
+                {% empty %}
+                <p style="color: #666; text-align: center;">No replies yet.</p>
+                {% endfor %}
+            </div>
+
+            <!-- Reply Form -->
+            <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px;">
+                <h4>Post a Reply</h4>
+                <form method="post">
+                    {% csrf_token %}
+                    <div style="margin-bottom: 10px;">
+                        {{ form.content }}
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label style="display: flex; align-items: center; gap: 10px;">
+                            {{ form.is_internal }}
+                            Internal Note (Staff Only)
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Send Reply</button>
+                </form>
+            </div>
+        </div>
     </div>
-    {% empty %}
-    <p style="color: #666;">No messages yet.</p>
-    {% endfor %}
+
+    <div style="flex: 1; min-width: 250px;">
+        <div class="card-panel">
+            <h3>Details</h3>
+            <table style="width: 100%; border: none;">
+                <tr>
+                    <td style="color: #888; border: none; padding: 5px 0;">Status:</td>
+                    <td style="border: none; padding: 5px 0; text-align: right;">{{ ticket.get_status_display }}</td>
+                </tr>
+                <tr>
+                    <td style="color: #888; border: none; padding: 5px 0;">Priority:</td>
+                    <td style="border: none; padding: 5px 0; text-align: right;">{{ ticket.get_priority_display }}</td>
+                </tr>
+                <tr>
+                    <td style="color: #888; border: none; padding: 5px 0;">Category:</td>
+                    <td style="border: none; padding: 5px 0; text-align: right;">{{ ticket.category }}</td>
+                </tr>
+                <tr>
+                    <td style="color: #888; border: none; padding: 5px 0;">Device:</td>
+                    <td style="border: none; padding: 5px 0; text-align: right;">
+                        {% if ticket.device %}
+                        <a href="{% url 'device_detail' ticket.device.id %}" style="color: var(--accent-blue);">{{ ticket.device.hostname }}</a>
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td style="color: #888; border: none; padding: 5px 0;">Assigned To:</td>
+                    <td style="border: none; padding: 5px 0; text-align: right;">{{ ticket.assigned_to|default:"Unassigned" }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
 </div>
 {% endblock %}

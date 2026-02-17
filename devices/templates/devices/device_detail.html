@@ -16,7 +16,7 @@
         <p><strong>Agent Version:</strong> {{ device.agent_version }}</p>
         <p><strong>Status:</strong> <span class="{% if device.is_online %}status-online{% else %}status-offline{% endif %}">{% if device.is_online %}ONLINE{% else %}OFFLINE{% endif %}</span></p>
         <p><strong>Last Seen:</strong> {{ device.last_seen|date:"Y-m-d H:i:s" }}</p>
-
+        
         <div style="margin-top: 20px;">
             <a href="{% url 'remote_control' device.id %}" class="btn btn-primary">Remote Control / Live View</a>
         </div>
@@ -67,10 +67,10 @@
 function sendCommand() {
     const cmd = document.getElementById('cmd-input').value;
     if (!cmd) return;
-
+    
     const resultDiv = document.getElementById('cmd-result');
     resultDiv.innerText = "Sending...";
-
+    
     fetch("{% url 'device_send_command' device.id %}", {
         method: 'POST',
         headers: {

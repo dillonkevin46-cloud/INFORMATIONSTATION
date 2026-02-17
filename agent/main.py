@@ -101,7 +101,7 @@ async def receive_task(websocket):
                 data = json.loads(message)
                 msg_type = data.get('type')
                 content = data.get('content', {}) # Sometimes wrapped in content
-
+                
                 # Handle direct commands or wrapped commands
                 if msg_type == 'command':
                     cmd = data.get('command') or content.get('command')
@@ -120,13 +120,13 @@ async def receive_task(websocket):
 async def handle_command(websocket, cmd):
     if not cmd:
         return
-
+    
     print(f"Executing command: {cmd}")
     try:
         # Run command
         proc = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=30)
         output = proc.stdout + proc.stderr
-
+        
         response = {
             "type": "command_response",
             "data": {
@@ -161,15 +161,15 @@ async def handle_screenshot(websocket):
             # Capture the primary monitor
             monitor = sct.monitors[1]
             sct_img = sct.grab(monitor)
-
+            
             # Convert to PIL Image
             img = Image.frombytes("RGB", sct_img.size, sct_img.bgra, "raw", "BGRX")
-
+            
             # Compress to JPEG
             buffer = io.BytesIO()
             img.save(buffer, format="JPEG", quality=50)
             img_str = base64.b64encode(buffer.getvalue()).decode('utf-8')
-
+            
             response = {
                 "type": "screenshot",
                 "data": {
@@ -251,7 +251,7 @@ def on_network_test(icon, item):
             msg = "Network is reachable."
         else:
             msg = "Network is unreachable."
-
+        
         if GUI_AVAILABLE:
             root = tk.Tk()
             root.withdraw()
@@ -268,13 +268,13 @@ def create_tray_icon():
     try:
         # Create a simple icon (color block) if no image file
         image = Image.new('RGB', (64, 64), color=(0, 212, 255))
-
+        
         menu = pystray.Menu(
             pystray.MenuItem("Report Issue", on_report_issue),
             pystray.MenuItem("Network Test", on_network_test),
             pystray.MenuItem("Exit", lambda icon, item: icon.stop())
         )
-
+        
         icon = pystray.Icon("Omni-RMM", image, "Omni-RMM Agent", menu)
         return icon
     except Exception as e:
@@ -294,7 +294,7 @@ if __name__ == "__main__":
     # Start asyncio loop in a separate thread
     t = threading.Thread(target=run_async_loop, daemon=True)
     t.start()
-
+    
     # Run GUI in main thread if available
     if GUI_AVAILABLE:
         try:

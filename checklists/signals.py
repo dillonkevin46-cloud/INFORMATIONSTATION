@@ -12,7 +12,7 @@ def create_ticket_on_submission(sender, instance, created, **kwargs):
 
         title = f"{instance.template.get_form_type_display()}: {instance.submitted_by}"
         description = f"Automated ticket for {instance.template.title}.\nSubmitted by: {instance.submitted_by}\n"
-
+        
         # Parse submission data if useful
         for key, value in instance.data.items():
             description += f"{key}: {value}\n"
@@ -25,7 +25,7 @@ def create_ticket_on_submission(sender, instance, created, **kwargs):
             client=instance.submitted_by if instance.submitted_by else None, # Assign to submitter
             # Assigned to? Maybe leave unassigned or assign to admin
         )
-
+        
         # Link back
         instance.ticket = ticket
         instance.save()

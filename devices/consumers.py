@@ -55,13 +55,13 @@ class AgentConsumer(AsyncJsonWebsocketConsumer):
         try:
             device = await self.get_or_create_device(data)
             self.device_id = str(device.id)
-
+            
             # Agent listens on this group for commands from server
             await self.channel_layer.group_add(
                 f"device_{self.device_id}",
                 self.channel_name
             )
-
+            
             await self.send_json({
                 'type': 'handshake_ack',
                 'status': 'success',

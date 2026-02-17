@@ -6,6 +6,9 @@
 
 {% block content %}
 <div class="card-panel">
+    <div style="margin-bottom: 20px;">
+        <a href="{% url 'article_create' %}" class="btn btn-primary">Create Article</a>
+    </div>
     <table>
         <thead>
             <tr>
@@ -25,6 +28,7 @@
                 <td>{{ article.updated_at|date:"Y-m-d" }}</td>
                 <td>
                     <a href="{% url 'article_detail' article.id %}" class="btn btn-primary" style="padding: 4px 8px; font-size: 0.8rem;">Read</a>
+                    <a href="{% url 'article_update' article.id %}" class="btn btn-primary" style="padding: 4px 8px; font-size: 0.8rem;">Edit</a>
                 </td>
             </tr>
             {% empty %}
