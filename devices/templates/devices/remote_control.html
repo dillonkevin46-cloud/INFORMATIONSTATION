@@ -1,0 +1,112 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Remote Control - {{ device.hostname }}{% endblock %}
+
+{% block header %}Remote Control: {{ device.hostname }}{% endblock %}
+
+{% block content %}
+<div style="display: flex; gap: 20px;">
+    <div class="card-panel" style="flex: 2;">
+        <h3>Live View</h3>
+        <div id="screen-container" style="background: #000; width: 100%; min-height: 400px; display: flex; align-items: center; justify-content: center; border: 1px solid #333;">
+            <img id="screen-img" src="" style="max-width: 100%; max-height: 600px; display: none;">
+            <p id="screen-status" style="color: #666;">Waiting for connection...</p>
+        </div>
+        <div style="margin-top: 10px;">
+            <button onclick="requestScreenshot()" class="btn btn-primary">Refresh Screen</button>
+            <label style="margin-left: 10px; color: #888;">
+                <input type="checkbox" id="auto-refresh"> Auto-Refresh (1s)
+            </label>
+        </div>
+    </div>
+
+    <div class="card-panel" style="flex: 1;">
+        <h3>Command Terminal</h3>
+        <div id="terminal-output" style="background: #111; color: #0f0; padding: 10px; height: 300px; overflow-y: auto; font-family: monospace; border: 1px solid #333; margin-bottom: 10px; white-space: pre-wrap;"></div>
+        <div style="display: flex; gap: 10px;">
+            <input type="text" id="cmd-input" placeholder="Enter command..." onkeypress="handleEnter(event)">
+            <button onclick="sendCommand()" class="btn btn-primary">Send</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const deviceId = "{{ device.id }}";
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${protocol}//${window.location.host}/ws/browser/${deviceId}/`;
+    let socket = null;
+    let autoRefreshInterval = null;
+
+    function connect() {
+        socket = new WebSocket(wsUrl);
+
+        socket.onopen = function() {
+            console.log("Connected to Remote Control");
+            document.getElementById('screen-status').innerText = "Connected. Requesting image...";
+            requestScreenshot();
+        };
+
+        socket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            const msgType = data.type;
+            const content = data.data;
+
+            if (msgType === 'screenshot') {
+                const img = document.getElementById('screen-img');
+                img.src = "data:image/jpeg;base64," + content.image;
+                img.style.display = 'block';
+                document.getElementById('screen-status').style.display = 'none';
+            } else if (msgType === 'command_response') {
+                const term = document.getElementById('terminal-output');
+                term.innerHTML += `\n> ${content.command}\n${content.output}\n`;
+                term.scrollTop = term.scrollHeight;
+            }
+        };
+
+        socket.onclose = function() {
+            console.log("Disconnected");
+            document.getElementById('screen-status').innerText = "Disconnected. Reconnecting...";
+            document.getElementById('screen-status').style.display = 'block';
+            setTimeout(connect, 3000);
+        };
+    }
+
+    function requestScreenshot() {
+        if (socket && socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({
+                type: 'get_screenshot'
+            }));
+        }
+    }
+
+    function sendCommand() {
+        const input = document.getElementById('cmd-input');
+        const cmd = input.value;
+        if (!cmd) return;
+
+        if (socket && socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({
+                type: 'command',
+                command: cmd
+            }));
+            const term = document.getElementById('terminal-output');
+            term.innerHTML += `\n$ ${cmd}\n`;
+            input.value = '';
+        }
+    }
+
+    function handleEnter(e) {
+        if (e.key === 'Enter') sendCommand();
+    }
+
+    document.getElementById('auto-refresh').addEventListener('change', function(e) {
+        if (e.target.checked) {
+            autoRefreshInterval = setInterval(requestScreenshot, 1000);
+        } else {
+            clearInterval(autoRefreshInterval);
+        }
+    });
+
+    connect();
+</script>
+{% endblock %}

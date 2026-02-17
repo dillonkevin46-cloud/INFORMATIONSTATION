@@ -36,7 +36,11 @@ Omni-RMM is a comprehensive Remote Monitoring and Management system.
 ## Setup (Agent)
 
 1. Navigate to the `agent/` directory (or distribute `agent/main.py`).
-2. Run the agent:
+2. Install agent dependencies:
+   ```bash
+   pip install websockets psutil pystray Pillow mss
+   ```
+3. Run the agent:
    ```bash
    python agent/main.py --server ws://localhost:8000/ws/agent/
    ```
@@ -44,10 +48,12 @@ Omni-RMM is a comprehensive Remote Monitoring and Management system.
 
 ## Features Implemented
 
+- **Remote Control**: Live screen viewing and terminal command execution.
+- **System Tray Icon**: Quick actions for reporting issues and network tests.
+- **Automation**: Auto-ticket creation from checklists and email notifications on ticket closure.
+- **Dashboard**: Real-time telemetry charts (CPU/RAM history).
 - **Database Schema**: Complete Django models for Users, Devices, Tickets, Assets, KB, Checklists.
-- **WebSocket Communication**: Real-time bidirectional communication between Server and Agent.
-- **Agent Logic**: Auto-discovery, Heartbeat (CPU/RAM/Disk usage), Command execution framework.
-- **Modular Architecture**: Separated apps for different functionalities.
+- **WebSocket Communication**: Real-time bidirectional communication.
 
 ## Environment Variables
 

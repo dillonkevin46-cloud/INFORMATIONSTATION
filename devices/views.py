@@ -22,7 +22,13 @@ def device_detail(request, device_id):
     device = get_object_or_404(Device, id=device_id)
     return render(request, 'devices/device_detail.html', {'device': device})
 
+def remote_control(request, device_id):
+    device = get_object_or_404(Device, id=device_id)
+    return render(request, 'devices/remote_control.html', {'device': device})
+
 def device_send_command(request, device_id):
+    # This view might still be useful for one-off commands,
+    # but Remote Control page uses WebSockets directly.
     if request.method == 'POST':
         try:
             device = get_object_or_404(Device, id=device_id)

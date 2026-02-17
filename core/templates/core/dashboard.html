@@ -5,6 +5,62 @@
 
 {% block header %}NOC Dashboard{% endblock %}
 
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch("{% url 'dashboard_chart_data' %}")
+            .then(response => response.json())
+            .then(data => {
+                const ctx = document.getElementById('telemetryChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            label: 'Avg CPU Usage (%)',
+                            data: data.cpu,
+                            borderColor: '#00ff9d',
+                            backgroundColor: 'rgba(0, 255, 157, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.4
+                        }, {
+                            label: 'Avg RAM Usage (%)',
+                            data: data.ram,
+                            borderColor: '#00d4ff',
+                            backgroundColor: 'rgba(0, 212, 255, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: { color: '#e0e0e0' }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                ticks: { color: '#888' }
+                            },
+                            x: {
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                ticks: { color: '#888' }
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => console.error('Error fetching chart data:', error));
+    });
+</script>
+{% endblock %}
+
 {% block content %}
 <div class="grid-container">
     <!-- Total Devices -->
@@ -41,6 +97,13 @@
         <div class="widget-footer">
             <span class="accent-dot dot-yellow"></span> Pending Resolution
         </div>
+    </div>
+</div>
+
+<div class="card-panel" style="margin-bottom: 20px;">
+    <h3>System Performance (Last 24h)</h3>
+    <div style="height: 300px;">
+        <canvas id="telemetryChart"></canvas>
     </div>
 </div>
 

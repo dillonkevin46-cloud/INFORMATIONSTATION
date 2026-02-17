@@ -153,3 +153,7 @@ CHANNEL_LAYERS = {
 }
 
 AUTH_USER_MODEL = 'core.User'
+
+# Email Backend (Console for Development)
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+DEFAULT_FROM_EMAIL = "noreply@omni-rmm.local"
