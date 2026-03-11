@@ -78,7 +78,7 @@ class AgentConsumer(AsyncJsonWebsocketConsumer):
             return
         try:
             await self.save_telemetry(data)
-            await self.update_last_seen()
+            await self.update_device_status(online=True)
             # Optional: Broadcast heartbeat to browser for live status?
             await self.broadcast_to_browser('heartbeat', data)
         except Exception as e:
@@ -110,11 +110,6 @@ class AgentConsumer(AsyncJsonWebsocketConsumer):
     def update_device_status(self, online):
         if self.device_id:
             Device.objects.filter(id=self.device_id).update(is_online=online, last_seen=timezone.now())
-
-    @database_sync_to_async
-    def update_last_seen(self):
-        if self.device_id:
-             Device.objects.filter(id=self.device_id).update(last_seen=timezone.now(), is_online=True)
 
     @database_sync_to_async
     def save_telemetry(self, data):
