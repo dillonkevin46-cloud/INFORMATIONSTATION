@@ -59,3 +59,5 @@ Omni-RMM is a comprehensive Remote Monitoring and Management system.
 
 - `DB_ENGINE`: Set to `postgresql` to use PostgreSQL.
 - `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`: Database connection details.
+- `SECRET_KEY`: (Required in Production) The secret key for cryptographic signing.
+- `DEBUG`: Set to `False` in production (defaults to `True`).
