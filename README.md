@@ -42,9 +42,11 @@ Omni-RMM is a comprehensive Remote Monitoring and Management system.
    ```
 3. Run the agent:
    ```bash
-   python agent/main.py --server ws://localhost:8000/ws/agent/
+   python agent/main.py --server wss://localhost:8000/ws/agent/
    ```
    Or set `RMM_SERVER_URL` environment variable.
+
+   *Note: For local development without SSL, use `ws://` instead of `wss://`.*
 
 ## Features Implemented
 
