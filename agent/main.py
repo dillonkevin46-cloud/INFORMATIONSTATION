@@ -73,7 +73,7 @@ async def heartbeat_task(websocket):
             ram = psutil.virtual_memory().percent
             try:
                 disk = psutil.disk_usage('/').percent
-            except:
+            except (psutil.Error, OSError):
                 disk = 0
             
             payload = {
